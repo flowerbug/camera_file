@@ -1,8 +1,3 @@
-# camera_file
-
-A bash script for moving files from camera to computer with an optional backup to an external device.
-
-
 Sun 02 Feb 2020 12:02:02 PM EST
 
 
