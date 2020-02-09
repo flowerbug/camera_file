@@ -203,7 +203,7 @@ done
 
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.0"
+  echo "$0 Version 1.0.1"
   exit
 fi
 
@@ -404,7 +404,7 @@ if test -d "${COLL}/${new_dir_name}" ; then
 else
 
   # make sure the permissions are what we want
-  chmod go-rwx ${STAGE}/*
+  chmod 600 ${STAGE}/*
 
   # ok finally we get to move some files, yay
   echo -e "Creating ${COLL}/${new_dir_name}.\n"
