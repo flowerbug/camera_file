@@ -203,7 +203,7 @@ done
 
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.0"
+  echo "$0 Version 1.0.2"
   exit
 fi
 
@@ -340,7 +340,7 @@ fi
 
 
 # make sure we have pictures to move and a place to move them
-count_them=`find ${CAM_DIR} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m)`
+count_them=`find ${CAM_DIR} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m`
 printout "Files in camera ${count_them}\n"
 if test ! -d "${STAGE}" ; then
   echo -e "Missing $STAGE directory...  Nothing done...\n\n"
@@ -404,7 +404,7 @@ if test -d "${COLL}/${new_dir_name}" ; then
 else
 
   # make sure the permissions are what we want
-  chmod go-rwx ${STAGE}/*
+  chmod 600 ${STAGE}/*
 
   # ok finally we get to move some files, yay
   echo -e "Creating ${COLL}/${new_dir_name}.\n"
