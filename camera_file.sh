@@ -139,6 +139,7 @@ COLL="${PIC_BASE}/collection/${CAMERA_PREFIX}"
 # unless I do that manually because most of the time I 
 # don't use them, just once in a while.
 EXTRA_BACKUP="Yes"
+#EXTRA_BACKUP="No"
 EXTRA_BASE="/mb/pictures"
 EXTRA_COLL="${EXTRA_BASE}/collection/${CAMERA_PREFIX}"
 
@@ -203,7 +204,7 @@ done
 
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.2"
+  echo "$0 Version 1.0.3"
   exit
 fi
 
@@ -341,8 +342,11 @@ fi
 
 # make sure we have pictures to move and a place to move them
 count_them=`find ${CAM_DIR} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m`
+
 printout "Files in camera ${count_them}\n"
+
 if test ! -d "${STAGE}" ; then
+
   echo -e "Missing $STAGE directory...  Nothing done...\n\n"
   camera_unmount
   date
@@ -356,15 +360,18 @@ else
 
   # make sure stage is empty
   count_stage=`find ${STAGE} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m`
+
   printout "Files in stage ${count_stage}\n"
+
   if test "${count_stage}" != "0" ; then
     echo -e "$STAGE directory should be empty...  Nothing done...\n\n"
     camera_unmount
     date
     exit
   else
-    echo -e "Moving ${CAM_DIR}'s ${count_stage} files to $STAGE.\n"
+    echo -e "Moving ${CAM_DIR}'s ${count_them} files to $STAGE.\n"
     mv ${CAM_DIR}/* ${STAGE}
+#   cp -a ${CAM_DIR}/* ${STAGE}
   fi
 fi
 
@@ -372,14 +379,13 @@ fi
 
 # the last file in the list will be used to set the date and time
 # for the new directory in the collection.
-ref_file=`find ${STAGE} -type f -exec basename {} \; | tail -1`
+ref_file=`find ${STAGE} -type f -exec basename {} \; | sort | tail -1`
 printout "Reference File ${ref_file}\n"
 
 # count how many directories there are already in the
 # collection.
 # remember find gives you the first directory too so this 
 # count is off by one too many.
-#count_coll=`find ${COLL} -maxdepth 1 -type d -print | wc -l`
 count_coll=`find ${COLL} -maxdepth 1 -type d -print 2>/dev/null | wc -l`
 printout "Count of collection directories ${count_coll}\n"
 
@@ -418,12 +424,18 @@ else
     exit
   fi
 
+  # recount the stage
+  count_stage=`find ${STAGE} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m`
+
+  printout "Files in stage ${count_stage}\n"
+
   echo -e "Moving ${count_stage} files from ${STAGE} to ${COLL}/${new_dir_name}.\n"
-  listing=`find ${STAGE} -maxdepth 1 -type f -exec basename {} \; 2>/dev/null`
+  listing=`find ${STAGE} -maxdepth 1 -type f -exec basename {} \; 2>/dev/null | sort`
   printout "List of files to move:\n$listing\n"
   for fname in ${listing}; do
     printout "  mv ${STAGE}/${fname} ${COLL}/${new_dir_name}"
     mv ${STAGE}/${fname} ${COLL}/${new_dir_name}
+#    cp -a ${STAGE}/${fname} ${COLL}/${new_dir_name}
     counter_stage=$(($counter_stage+1))
   done
   sync
