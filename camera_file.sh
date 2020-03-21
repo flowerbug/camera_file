@@ -99,6 +99,12 @@ TOT_DIGITS="6"
 # used.
 CAMERA_PREFIX="DSC"
 
+# i pass the camera name to the script as a parameter
+# as i don't want to hard-code this, i think you can 
+# set this here and not pass it in and this should work, 
+# but as of yet i haven't tested it.
+CAMERA_NAME=""
+
 # base picture directory
 PIC_BASE="${HOME}/pics"
 
@@ -158,7 +164,7 @@ function usage_message () {
   [-V] | [--Version]       give the version number\n\n\n
   CAMERA_NAME              the location given by gphoto2\n\n\n\
 Example:\n\
-$ camera_file.sh NIKON_NIKON_DSC_D3500_1234567890123\n\n\
+$ $0 NIKON_NIKON_DSC_D3500_1234567890123\n\n\
 " >&2
 exit
 }
@@ -202,9 +208,17 @@ shift
 done
 
 
+# we really do need a camera name of some kind
+if test "${CAMERA_NAME}" == "" ; then
+  echo "Camera name should not be blank...  Exiting..."
+  date
+  exit
+fi
+
+
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.3"
+  echo "$0 Version 1.0.4"
   exit
 fi
 
@@ -222,6 +236,7 @@ function printout ( ) {
     echo -e "$1"
   fi
   }
+
 
 # camera fuser unmount
 function camera_unmount ( ) {
