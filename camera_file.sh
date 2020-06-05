@@ -6,7 +6,7 @@
 # are either mistakes or you just don't want before you do any
 # further processing/indexing of pictures.  The Local Configuration 
 # items may need to be changed to suit your own local machine, 
-# camera, backup device and desires.
+# camera, backup device(s) and desires.
 
 
 # LICENSE:
@@ -34,11 +34,11 @@
 #
 # This script is designed to remove pictures from your camera
 # and move them to your local machine.  If specified (below) it 
-# will also make a backup copy to another device or directory.
+# will also make a backup copy to other device(s) or directories.
 #
 # It is not meant to work until after it is configured because
 # it is very unlikely you will have the exact same camera and
-# directory structure or backup device that I have.
+# directory structure or backup device(s) that I have.
 #
 # The reason I need this script is because the camera resets the
 # name/number of the files each time the pictures are removed so
@@ -63,13 +63,10 @@
 # they are what I want before I do any further picture taking or
 # editing.
 #
-# I plan on having another script for indexing the pictures and
-# setting up the file names to make sure they are guaranteed to be
-# unique before any further things happen to them (like using them
-# for my website).  The current non-unique file names will be an
-# issue for how I do things with my directories and organization 
-# for the website - so I do need to figure this out before I get a
-# lot more pictures taken and edited.
+# I have another script for indexing the pictures and setting up 
+# the file names to make sure they are guaranteed to be unique 
+# before any further things happen to them (like using them for 
+# my website).  See mcol_pictures...
 
 
 # Local Configuration
@@ -137,6 +134,11 @@ COLL="${PIC_BASE}/collection/${CAMERA_PREFIX}"
 # if we are making a backup copy someplace else
 # adjust the following for your local setup.
 #
+# NOTE: my local setup has changed now to include 
+# a new SSD with plenty of space so i am adding 
+# that as an automatic copy even if the external 
+# device is not being used (see the next section).
+#
 # change this to "No" if you don't want to make an
 # extra backup to another device.  note this device is
 # not automatically mounted or unmounted by this script
@@ -144,13 +146,20 @@ COLL="${PIC_BASE}/collection/${CAMERA_PREFIX}"
 # personally do not want devices turned on or mounted 
 # unless I do that manually because most of the time I 
 # don't use them, just once in a while.
-EXTRA_BACKUP="Yes"
-#EXTRA_BACKUP="No"
+#EXTRA_BACKUP="Yes"
+EXTRA_BACKUP="No"
 EXTRA_BASE="/mb/pictures"
 EXTRA_COLL="${EXTRA_BASE}/collection/${CAMERA_PREFIX}"
 
 #/etc/fstab or mount -l should tell you what to use
 VOL_LABEL="VOL_01"  # use the label for the backup device
+
+# the SSD is a second device and it is always plugged in 
+# and available so i am now using this instead of the 
+# above external USB device.
+SSD_BACKUP="Yes"
+SSD_BASE="${HOME}/pics2/"
+SSD_COLL="${SSD_BASE}/backupcollection/${CAMERA_PREFIX}"
 
 
 # End Local Configuration
@@ -218,7 +227,7 @@ fi
 
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.4"
+  echo "$0 Version 1.0.5"
   exit
 fi
 
@@ -355,6 +364,26 @@ if test "${EXTRA_BACKUP}" == "Yes" ; then
 fi
 
 
+# only bother with the SSD stuff if wanted.
+if test "${SSD_BACKUP}" == "Yes" ; then
+
+  # the SSD backup device directory
+  if test ! -d ${SSD_BASE} ; then
+    echo -e "${SSD_BASE} doesn't exist.  create it...\n"
+    mkdir ${SSD_BASE}
+  fi
+  
+  # the SSD backup collection
+  if test ! -d ${SSD_COLL} ; then
+    echo -e "${SSD_COLL} doesn't exist.  create it...\n"
+    mkdir -p ${SSD_COLL}
+  fi
+  
+fi
+
+
+# make sure we have pictures to move and a place to move them
+
 # make sure we have pictures to move and a place to move them
 count_them=`find ${CAM_DIR} -type f -exec printf %.0s. {} + 2>/dev/null | wc -m`
 
@@ -415,6 +444,7 @@ printout "${COLL}/${new_dir_name}\n"
 # let us keep track of how many we move
 counter_stage="0"
 counter_extra="0"
+counter_ssd="0"
 
 # make sure it doesn't already exist
 if test -d "${COLL}/${new_dir_name}" ; then
@@ -488,15 +518,54 @@ else
     touch -r "${COLL}/${new_dir_name}/${ref_file}" "${EXTRA_COLL}/${new_dir_name}"
     sync
   fi
+
+  # do the SSD backup if requested
+  if test "${SSD_BACKUP}" == "Yes" ; then
+
+    # make sure it doesn't already exist
+    if test -d "${SSD_COLL}/${new_dir_name}" ; then
+      echo -e "Directory ${SSD_COLL}/${new_dir_name} already exists... Exiting...\n\n"
+      camera_unmount
+      date
+      exit
+    fi
+
+    mkdir -p ${SSD_COLL}/${new_dir_name}
+
+    # make sure it actually got created
+    if test ! -d "${SSD_COLL}/${new_dir_name}" ; then
+      echo -e "${SSD_COLL}/${new_dir_name} didn't get created...  Exiting...\n\n"
+      camera_unmount
+      date
+      exit
+    fi
+
+    echo -e "\n\nBacking up ${counter_stage} files from ${COLL} to ${SSD_COLL}...\n"
+    for fname in ${listing}; do
+      printout "  cp -av ${COLL}/${new_dir_name}/${fname} ${SSD_COLL}/${new_dir_name}/${fname}"
+      cp -av "${COLL}/${new_dir_name}/${fname}" "${SSD_COLL}/${new_dir_name}/${fname}"
+      counter_ssd=$(($counter_ssd+1))
+    done
+    sync
+    touch -r "${COLL}/${new_dir_name}/${ref_file}" "${SSD_COLL}/${new_dir_name}"
+    sync
+  fi
 fi
 
 
 # say how many we moved
 if test "${EXTRA_BACKUP}" == "Yes" ; then
   if test "${counter_stage}" == "${counter_extra}" ; then
-    echo -e "\n\nMoved ${counter_stage} file(s) and backed up ${counter_extra} file(s).\n\n"
+    echo -e "\n\nMoved ${counter_stage} file(s) and External backed up ${counter_extra} file(s).\n\n"
   else
-    echo -e "\n\nMoved ${counter_stage} file(s) and backed up ${counter_extra} file(s).\n\n"
+    echo -e "\n\nMoved ${counter_stage} file(s) and External backed up ${counter_extra} file(s).\n\n"
+    echo -e "SOMETHING VERY STRANGE HAPPENED!  These numbers should be the same!\n\n"
+  fi
+elif test "${SSD_BACKUP}" == "Yes" ; then
+  if test "${counter_stage}" == "${counter_ssd}" ; then
+    echo -e "\n\nMoved ${counter_stage} file(s) and SSD backed up ${counter_ssd} file(s).\n\n"
+  else
+    echo -e "\n\nMoved ${counter_stage} file(s) and SSD backed up ${counter_ssd} file(s).\n\n"
     echo -e "SOMETHING VERY STRANGE HAPPENED!  These numbers should be the same!\n\n"
   fi
 else
