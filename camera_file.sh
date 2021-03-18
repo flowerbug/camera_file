@@ -158,7 +158,7 @@ VOL_LABEL="VOL_01"  # use the label for the backup device
 # and available so i am now using this instead of the 
 # above external USB device.
 SSD_BACKUP="Yes"
-SSD_BASE="${HOME}/pics2/"
+SSD_BASE="${HOME}/pics2"
 SSD_COLL="${SSD_BASE}/backupcollection/${CAMERA_PREFIX}"
 
 
@@ -227,7 +227,7 @@ fi
 
 # print the version if asked and then exit
 if test "${version}" == "1" ; then
-  echo "$0 Version 1.0.5"
+  echo "$0 Version 1.0.6"
   exit
 fi
 
