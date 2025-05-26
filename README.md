@@ -1,4 +1,4 @@
-Sun 02 Feb 2020 12:02:02 PM EST
+Mon 26 May 2025 16:43:42 PM EST
 
 
 # General Information
@@ -40,7 +40,7 @@ $ camera_file.sh NIKON_NIKON_DSC_D3500_1234567890123
 
   Some of the dependencies are: libglib2.0, gphotofs, mount, find, rev, cut, lsusb and I'm sure some others.
 
-  To run the script it needs to be in the $PATH as an executable.  It should run from anywhere.  The directories this script operates on are specified using ${HOME} and if you desire a backup copy to be made to another location use ${EXTRA_BACKUP}.
+  To run the script it needs to be in the ${PATH} as an executable.  It should run from anywhere.  The directories this script operates on are specified using ${HOME} and if you desire a backup copy to be made to another location use ${EXTRA_BACKUP}.
 
 
 # Other Notes
@@ -50,7 +50,7 @@ $ camera_file.sh NIKON_NIKON_DSC_D3500_1234567890123
 gphoto2://CAMERA_NAME/
 
 which I don't want so I have to unmount it before remounting
-it where I want it to be mounted on $HOME/pics/camera
+it where I want it to be mounted on ${HOME}/pics/camera
 
 gio mount -u gphoto2://CAMERA_NAME/
 
@@ -62,10 +62,10 @@ gio mount -u gphoto2://CAMERA_NAME/
        unmounting
            fusermount -u <mountpoint>
 
-  The local mount point set up under $HOME would give the 
+  The local mount point set up under ${HOME} would give the 
 full path for my camera as:
 
-$HOME/pics/camera/store_00010001/DCIM/100D3500
+${HOME}/pics/camera/store_00010001/DCIM/100D3500
 
 
 # Bug Reporting
